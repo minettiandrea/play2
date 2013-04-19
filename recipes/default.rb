@@ -17,8 +17,6 @@
 # limitations under the License.
 #
 
-require 'fileutils'
-
 include_recipe "java"
 
 # 
@@ -37,13 +35,7 @@ remote_file "#{node[:play2][:path][:prefix]}/play-#{node[:play2][:version]}.zip"
   action :create_if_missing
 end
 
-# bash "install play" do
-#   user "root"
-#   cwd node[:play2][:path][:prefix]
-#   code <<-EOH
-#     unzip play2.zip
-#   EOH
-# end
+
 
 execute "extract" do
   user "root"
@@ -52,6 +44,12 @@ execute "extract" do
   not_if do
     File.exists?("#{node[:play2][:path][:prefix]}/play-#{node[:play2][:version]}")
   end
+end
+
+bash "set permissions" do
+  user "root"
+  cwd node[:play2][:path][:prefix]
+  code "chown vagrant -R play-#{node[:play2][:version]}"
 end
 
 template "/etc/profile.d/play.sh" do
